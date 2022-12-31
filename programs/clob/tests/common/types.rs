@@ -5,7 +5,7 @@ use std::sync::Arc;
 use thiserror::Error;
 
 pub struct TestContext {
-    pub initial_market_owner: Arc<Keypair>,
+    pub payer: Arc<Keypair>,
     pub context: ProgramTestContext,
     pub rent: Rent,
 }

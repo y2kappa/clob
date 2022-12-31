@@ -1,8 +1,8 @@
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
-import { AnchorBpfTemplate } from "../target/types/anchor_bpf_template";
+import { AnchorBpfTemplate } from "../target/types/clob";
 
-describe("anchor_bpf_template", () => {
+describe("clob", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
