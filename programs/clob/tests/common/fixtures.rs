@@ -1,4 +1,5 @@
 use super::{runner::test, setup::funded_kp, types::TestContext};
+use solana_sdk::native_token::sol_to_lamports;
 
 pub enum ProgramDependency {
     SOLEND,
@@ -11,12 +12,10 @@ pub async fn setup_empty_market_with_dependencies(
 
     let admin = funded_kp(&mut program, SOL::from(10.0));
 
-    let mut ctx = test::start(program, &admin).await;
+    let ctx = test::start(program, &admin).await;
 
     ctx
 }
-
-use solana_sdk::native_token::sol_to_lamports;
 
 pub struct SOL;
 impl SOL {

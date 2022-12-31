@@ -1,31 +1,34 @@
 [package]
-name = "anchor_bpf_template"
+name = "clob"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "anchor_bpf_template"
+name = "clob"
 
 [features]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
+localnet = []
+edition2021 = []
+integration_tests = []
 default = []
 
 [profile.release]
 overflow-checks = true
 
 [dependencies]
-anchor-lang = "0.25.0"
+anchor-lang = "0.26.0"
 mpl-token-metadata = { version = "1.2.5", features = ["no-entrypoint"]}
 spl-token = { version = "3.3.0", features = ["no-entrypoint"] }
 
 [dev-dependencies]
-solana-sdk = "~1.10"
-solana-program-test = "~1.10"
-solana-logger = "~1.10"
+solana-sdk = "1.14.11"
+solana-program-test = "1.14.11"
+solana-logger = "1.14.11"
 spl-associated-token-account = "1.0.3"
 arrayref = "0.3.6"

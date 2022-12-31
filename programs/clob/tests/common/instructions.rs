@@ -1,13 +1,14 @@
 use std::sync::Arc;
 
-use anchor_lang::solana_program::example_mocks::solana_sdk::transaction::Transaction;
-use solana_sdk::{instruction::Instruction, signature::Keypair, signer::Signer};
+use solana_sdk::{
+    instruction::Instruction, signature::Keypair, signer::Signer, transaction::Transaction,
+};
 
 use super::setup::Env;
 
 pub async fn initialize<'a>(env: Env<'a>, payer: Arc<Keypair>) -> Transaction {
     let instruction = Instruction {
-        program_id: anchor_bpf_template::id(),
+        program_id: clob::id(),
         accounts: vec![],
         data: vec![],
     };

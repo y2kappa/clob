@@ -2,8 +2,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anchor_lang::prelude::{Clock, Pubkey};
-use arrayref::array_ref;
-use solana_program_test::BanksClientError;
 use solana_sdk::commitment_config::CommitmentLevel;
 use solana_sdk::hash::Hash;
 use solana_sdk::program_error::ProgramError;
@@ -18,8 +16,6 @@ use spl_token::state::Mint;
 
 use crate::common::setup::KP;
 
-use self::token::create_token_account;
-
 use super::types::TestContext;
 
 pub mod test {
@@ -29,11 +25,7 @@ pub mod test {
 
     use super::*;
     pub fn program(dependencies: &[ProgramDependency]) -> ProgramTest {
-        let mut program_test = ProgramTest::new(
-            "anchor_bpf_template",
-            anchor_bpf_template::ID,
-            processor!(anchor_bpf_template::entry),
-        );
+        let mut program_test = ProgramTest::new("clob", clob::ID, processor!(clob::entry));
 
         dependencies.iter().for_each(|dep| match dep {
             ProgramDependency::SOLEND => {
@@ -43,14 +35,14 @@ pub mod test {
         program_test
     }
 
-    pub async fn start(test: ProgramTest, initial_market_owner: &KP) -> TestContext {
+    pub async fn start(test: ProgramTest, payer: &KP) -> TestContext {
         let mut context = test.start_with_context().await;
         let rent = context.banks_client.get_rent().await.unwrap();
 
         TestContext {
             context,
             rent,
-            initial_market_owner: initial_market_owner.clone(),
+            payer: payer.clone(),
         }
     }
 }
@@ -196,7 +188,7 @@ pub mod token {
         let transaction = Transaction::new_signed_with_payer(
             &[
                 system_instruction::create_account(
-                    &test_ctx.initial_market_owner.pubkey(),
+                    &test_ctx.payer.pubkey(),
                     &mint.pubkey(),
                     mint_rent,
                     Mint::LEN as u64,
@@ -211,8 +203,8 @@ pub mod token {
                 )
                 .unwrap(),
             ],
-            Some(&test_ctx.initial_market_owner.pubkey()),
-            &[&test_ctx.initial_market_owner, mint.as_ref()],
+            Some(&test_ctx.payer.pubkey()),
+            &[&test_ctx.payer, mint.as_ref()],
             test_ctx
                 .context
                 .banks_client
@@ -235,7 +227,7 @@ pub mod token {
         let transaction = Transaction::new_signed_with_payer(
             &[
                 system_instruction::create_account(
-                    &test_ctx.initial_market_owner.pubkey(),
+                    &test_ctx.payer.pubkey(),
                     &mint.pubkey(),
                     mint_rent,
                     Mint::LEN as u64,
@@ -250,8 +242,8 @@ pub mod token {
                 )
                 .unwrap(),
             ],
-            Some(&test_ctx.initial_market_owner.pubkey()),
-            &[&test_ctx.initial_market_owner, mint.as_ref()],
+            Some(&test_ctx.payer.pubkey()),
+            &[&test_ctx.payer, mint.as_ref()],
             test_ctx
                 .context
                 .banks_client
@@ -273,13 +265,13 @@ pub mod token {
                 &spl_token::id(),
                 mint,
                 mint_into_account,
-                &env.initial_market_owner.pubkey(),
+                &env.payer.pubkey(),
                 &[],
                 amount,
             )
             .unwrap()],
-            Some(&env.initial_market_owner.pubkey()),
-            &[&env.initial_market_owner, env.initial_market_owner.as_ref()],
+            Some(&env.payer.pubkey()),
+            &[&env.payer, env.payer.as_ref()],
             env.context
                 .banks_client
                 .get_latest_blockhash()
@@ -310,8 +302,8 @@ pub mod token {
                 amount,
             )
             .unwrap()],
-            Some(&env.initial_market_owner.pubkey()),
-            &[&env.initial_market_owner, authority.as_ref()],
+            Some(&env.payer.pubkey()),
+            &[&env.payer, authority.as_ref()],
             env.context
                 .banks_client
                 .get_latest_blockhash()
@@ -459,67 +451,5 @@ impl TestContext {
             .unwrap();
 
         Arc::new(account)
-    }
-
-    pub async fn create_token_account(
-        &mut self,
-        account: &KP,
-        mint: &Pubkey,
-        owner: &Pubkey,
-    ) -> Result<(), BanksClientError> {
-        create_token_account(
-            self,
-            self.initial_market_owner.clone(),
-            account,
-            mint,
-            owner,
-        )
-        .await
-    }
-
-    pub async fn mint_to(
-        &mut self,
-        mint: &Pubkey,
-        mint_into_account: &Pubkey,
-        amount: u64,
-    ) -> Result<(), TransportError> {
-        token::mint_to(self, mint, mint_into_account, amount).await
-    }
-
-    pub async fn mint_with_authority(
-        &mut self,
-        mint: &Pubkey,
-        mint_into_account: &Pubkey,
-        authority: &KP,
-        amount: u64,
-    ) -> Result<(), TransportError> {
-        token::mint_with_authority(self, mint, mint_into_account, authority, amount).await
-    }
-
-    pub async fn get_balance(&mut self, token_account: &Pubkey) -> u64 {
-        let acc = self
-            .context
-            .banks_client
-            .get_account(token_account.clone())
-            .await
-            .unwrap()
-            .unwrap();
-
-        Self::get_token_balance(&acc.data)
-    }
-
-    fn check_data_len(data: &[u8], min_len: usize) -> Result<(), ProgramError> {
-        if data.len() < min_len {
-            Err(ProgramError::AccountDataTooSmall)
-        } else {
-            Ok(())
-        }
-    }
-
-    pub fn get_token_balance(data: &[u8]) -> u64 {
-        Self::check_data_len(&data, spl_token::state::Account::get_packed_len()).unwrap();
-        let amount = array_ref![data, 64, 8];
-
-        u64::from_le_bytes(*amount)
     }
 }
