@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
-use anchor_lang::prelude::Pubkey;
-use solana_program_test::{BanksClient, ProgramTest, ProgramTestContext};
+use solana_program_test::ProgramTest;
 use solana_sdk::{
     account::{Account, AccountSharedData},
     native_token::sol_to_lamports,
@@ -17,11 +16,6 @@ pub async fn setup_ctx() -> TestContext {
     let admin = funded_kp(&mut program, SOL::from(10.0));
     let ctx = test::start(program, &admin).await;
     ctx
-}
-
-pub struct Env<'a> {
-    pub program_id: &'a Pubkey,
-    pub client: &'a mut BanksClient,
 }
 
 pub type KP = Arc<Keypair>;
@@ -44,22 +38,18 @@ pub fn funded_kp(test: &mut ProgramTest, min_balance_lamports: u64) -> KP {
     fund_kp(test, min_balance_lamports, kp())
 }
 
-pub fn funded_new_kp(test: &mut ProgramTestContext, min_balance_lamports: u64) -> KP {
+pub fn funded_new_kp(test: &mut TestContext, min_balance_lamports: u64) -> KP {
     fund_new_kp(test, min_balance_lamports, kp())
 }
 
-pub fn fund_new_kp(
-    test: &mut ProgramTestContext,
-    min_balance_lamports: u64,
-    user: Arc<Keypair>,
-) -> KP {
+pub fn fund_new_kp(test: &mut TestContext, min_balance_lamports: u64, user: Arc<Keypair>) -> KP {
     let account = AccountSharedData::new(min_balance_lamports, 0, &system_program::ID);
-    test.set_account(&user.pubkey(), &account);
+    test.context.set_account(&user.pubkey(), &account);
     user
 }
 
 pub fn funded_new_kps<const NUM: usize>(
-    test: &mut ProgramTestContext,
+    test: &mut TestContext,
     min_balance_lamports: u64,
 ) -> [KP; NUM] {
     (0..NUM)

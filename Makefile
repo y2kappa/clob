@@ -36,5 +36,7 @@ ifdef test
 endif
 ifdef RUST_ARGS
 	$(eval _ARGS+= -- ${RUST_ARGS})
+else 
+	$(eval _ARGS+= -- --nocapture)
 endif
 	RUST_MIN_STACK=83886080 RUST_LOG=${RUST_LOG} RUST_BACKTRACE=${RUST_BACKTRACE} cargo test-bpf --features localnet integration_tests edition2021  ${_ARGS}

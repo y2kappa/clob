@@ -738,6 +738,7 @@ dependencies = [
  "anchor-lang",
  "arrayref",
  "mpl-token-metadata",
+ "sha2 0.10.6",
  "solana-logger",
  "solana-program-test",
  "solana-sdk",
