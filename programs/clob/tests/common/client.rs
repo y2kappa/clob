@@ -8,13 +8,13 @@ use std::sync::Arc;
 
 use super::types::TestContext;
 
-pub async fn initialize<'a>(
+pub async fn initialize_market<'a>(
     ctx: &mut TestContext,
     admin: Arc<Keypair>,
 ) -> Result<(), BanksClientError> {
     let data = {
         let mut data: Vec<u8> = vec![];
-        data.extend_from_slice(&dispatch_sig("global", "initialize"));
+        data.extend_from_slice(&dispatch_sig("global", "initialize_market"));
         data
     };
 
