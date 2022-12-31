@@ -21,17 +21,11 @@ use super::types::TestContext;
 pub mod test {
     use solana_program_test::{processor, ProgramTest};
 
-    use crate::common::{consts::solend, fixtures::ProgramDependency, types::TestContext};
+    use crate::common::types::TestContext;
 
     use super::*;
-    pub fn program(dependencies: &[ProgramDependency]) -> ProgramTest {
-        let mut program_test = ProgramTest::new("clob", clob::ID, processor!(clob::entry));
-
-        dependencies.iter().for_each(|dep| match dep {
-            ProgramDependency::SOLEND => {
-                program_test.add_program("solend", solend::ID, None);
-            }
-        });
+    pub fn program() -> ProgramTest {
+        let program_test = ProgramTest::new("clob", clob::ID, processor!(clob::entry));
         program_test
     }
 

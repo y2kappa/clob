@@ -4,10 +4,20 @@ use anchor_lang::prelude::Pubkey;
 use solana_program_test::{BanksClient, ProgramTest, ProgramTestContext};
 use solana_sdk::{
     account::{Account, AccountSharedData},
+    native_token::sol_to_lamports,
     signature::Keypair,
     signer::Signer,
     system_program,
 };
+
+use super::{runner::test, types::TestContext};
+
+pub async fn setup_ctx() -> TestContext {
+    let mut program = test::program();
+    let admin = funded_kp(&mut program, SOL::from(10.0));
+    let ctx = test::start(program, &admin).await;
+    ctx
+}
 
 pub struct Env<'a> {
     pub program_id: &'a Pubkey,
@@ -68,4 +78,14 @@ pub fn funded_kps<const NUM: usize>(
         .collect::<Vec<KP>>()
         .try_into()
         .unwrap()
+}
+
+pub struct SOL;
+impl SOL {
+    pub fn one() -> u64 {
+        Self::from(1.0)
+    }
+    pub fn from(amt: f64) -> u64 {
+        sol_to_lamports(amt)
+    }
 }
